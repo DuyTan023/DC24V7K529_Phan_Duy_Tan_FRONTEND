@@ -1,4 +1,5 @@
 import ContactBook from "@/views/ContactBook.vue";
+
 import { createRouter, createWebHistory } from "vue-router";
 const routes = [
   {
@@ -6,7 +7,16 @@ const routes = [
     name: "contactbook",
     component: ContactBook,
   },
-
+  {
+    path: "/login",
+    name: "login",
+    component: () => import("@/views/Login.vue"),
+  },
+  {
+    path: "/register",
+    name: "register",
+    component: () => import("@/views/Register.vue"),
+  },
   {
     path: "/:pathMatch(.*)*",
     name: "notfound",

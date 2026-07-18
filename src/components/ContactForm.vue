@@ -1,5 +1,7 @@
+
 <template>
   <Form @submit="submitContact" :validation-schema="contactFormSchema">
+    <!-- Tên -->
     <div class="form-group">
       <label for="name">Tên</label>
 
@@ -12,6 +14,8 @@
 
       <ErrorMessage name="name" class="error-feedback" />
     </div>
+
+    <!-- Email -->
     <div class="form-group">
       <label for="email">E-mail</label>
 
@@ -24,6 +28,8 @@
 
       <ErrorMessage name="email" class="error-feedback" />
     </div>
+
+    <!-- Địa chỉ -->
     <div class="form-group">
       <label for="address">Địa chỉ</label>
 
@@ -36,6 +42,8 @@
 
       <ErrorMessage name="address" class="error-feedback" />
     </div>
+
+    <!-- Điện thoại -->
     <div class="form-group">
       <label for="phone">Điện thoại</label>
 
@@ -48,29 +56,67 @@
 
       <ErrorMessage name="phone" class="error-feedback" />
     </div>
+
+    <!-- Yêu thích -->
     <div class="form-group form-check">
       <input
-        name="favorite"
         type="checkbox"
         class="form-check-input"
+        id="favorite"
         v-model="contactLocal.favorite"
       />
 
-      <label for="favorite" class="form-check-label">
+      <label class="form-check-label" for="favorite">
         <strong>Liên hệ yêu thích</strong>
       </label>
     </div>
+
+    <!-- Sở thích -->
     <div class="form-group">
-      <button class="btn btn-primary">Lưu</button>
+      <label><strong>Sở thích</strong></label>
+
+      <div
+        class="form-check"
+        v-for="hobby in availableHobbies"
+        :key="hobby"
+      >
+        <input
+          class="form-check-input"
+          type="checkbox"
+          :id="hobby"
+          :value="hobby"
+          v-model="contactLocal.hobbies"
+        />
+
+        <label
+          class="form-check-label"
+          :for="hobby"
+        >
+          {{ hobby }}
+        </label>
+      </div>
+    </div>
+
+    <!-- Button -->
+    <div class="form-group mt-3">
+      <button class="btn btn-primary">
+        Lưu
+      </button>
+
       <button
         v-if="contactLocal._id"
         type="button"
-        class="ml-2 btn btn-danger"
+        class="btn btn-danger ml-2"
         @click="deleteContact"
       >
         Xóa
       </button>
-      <button type="button" class="ml-2 btn btn-danger" @click="Cancel">
+
+      <button
+        type="button"
+        class="btn btn-secondary ml-2"
+        @click="Cancel"
+      >
         Thoát
       </button>
     </div>
@@ -78,61 +124,89 @@
 </template>
 
 <script>
+import { ErrorMessage, Field, Form } from "vee-validate";
 import * as yup from "yup";
-import { Form, Field, ErrorMessage } from "vee-validate";
+
 export default {
   components: {
     Form,
     Field,
     ErrorMessage,
   },
-  emits: ["submit:contact", "delete:contact"],
+
   props: {
-    contact: { type: Object, required: true },
+    contact: {
+      type: Object,
+      required: true,
+    },
   },
+
+  emits: ["submit:contact", "delete:contact"],
+
   data() {
-    const contactFormSchema = yup.object().shape({
+    const contactFormSchema = yup.object({
       name: yup
         .string()
         .required("Tên phải có giá trị.")
-        .min(2, "Tên phải ít nhất 2 ký tự.")
-        .max(50, "Tên có nhiều nhất 50 ký tự."),
+        .min(2, "Tên ít nhất 2 ký tự.")
+        .max(50, "Tên tối đa 50 ký tự."),
+
       email: yup
         .string()
-        .email("E-mail không đúng.")
-        .max(50, "E-mail tối đa 50 ký tự."),
-      address: yup.string().max(100, "Địa chỉ tối đa 100 ký tự."),
+        .email("Email không hợp lệ.")
+        .max(50, "Email tối đa 50 ký tự."),
+
+      address: yup
+        .string()
+        .max(100, "Địa chỉ tối đa 100 ký tự."),
+
       phone: yup
         .string()
         .matches(
-          /((09|03|07|08|05)+([0-9]{8})\b)/g,
-          "Số điện thoại không hợp lệ.",
+          /(09|03|07|08|05)+([0-9]{8})\b/,
+          "Số điện thoại không hợp lệ."
         ),
     });
+
     return {
-      // Chúng ta sẽ không muốn hiệu chỉnh props, nên tạo biến cục bộ
-      // contactLocal để liên kết với các input trên form
-      contactLocal: this.contact,
+      contactLocal: {
+        ...this.contact,
+        hobbies: Array.isArray(this.contact.hobbies)
+          ? [...this.contact.hobbies]
+          : [],
+      },
+
+      availableHobbies: [
+        "Đá bóng",
+        "Bóng chuyền",
+        "Câu cá",
+        "Ca hát",
+        "Chơi đàn",
+        "Chạy bộ",
+      ],
+
       contactFormSchema,
     };
   },
+
   methods: {
     submitContact() {
       this.$emit("submit:contact", this.contactLocal);
     },
+
     deleteContact() {
-      this.$emit("delete:contact", this.contactLocal.id);
+      this.$emit("delete:contact", this.contactLocal._id);
     },
-  },
-  Cancel() {
-    const reply = window.confirm(
-      "You have unsaved changes! Do you want to leave?",
-    );
-    if (!reply) {
-      // stay on the page if
-      // user clicks 'Cancel'
-      return false;
-    } else this.$router.push({ name: "contactbook" });
+
+    Cancel() {
+      const reply = window.confirm(
+        "Bạn có thay đổi chưa lưu. Bạn có muốn thoát không?"
+      );
+
+      if (reply) {
+        this.$router.push({ name: "contactbook" });
+      }
+    },
   },
 };
 </script>
