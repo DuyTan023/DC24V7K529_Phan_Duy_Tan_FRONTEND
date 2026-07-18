@@ -1,16 +1,19 @@
 import ContactBook from "@/views/ContactBook.vue";
-
 import { createRouter, createWebHistory } from "vue-router";
 const routes = [
   {
     path: "/",
-    name: "contactbook",
-    component: ContactBook,
+    redirect: "/login",
   },
   {
     path: "/login",
     name: "login",
     component: () => import("@/views/Login.vue"),
+  },
+  {
+    path: "/contactbook",
+    name: "contactbook",
+    component: ContactBook,
   },
   {
     path: "/register",
